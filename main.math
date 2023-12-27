@@ -1,0 +1,13 @@
+x = 5.1 + 2 * 4
+y = 8000000 * ( 5 + 5 )
+z = progA ( y )
+
+print x
+
+progA () {
+    return 1
+}
+
+progB () {
+    return 2 / 4 + 4
+}
