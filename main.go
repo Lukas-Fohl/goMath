@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -211,7 +212,93 @@ func main() {
 		log.Fatalf("cant split into tokens: %v", err)
 	}
 	err, correctedTokens := correctTypes(tokens)
-	tokenPrint(correctedTokens)
+	//tokenPrint(correctedTokens)
+	math(correctedTokens)
+}
+
+func isOperation(tokenTypeInput mod) bool {
+	if tokenTypeInput == op_add || tokenTypeInput == op_sub || tokenTypeInput == op_div || tokenTypeInput == op_mul {
+		return true
+	}
+	return false
+}
+
+func math(tokenIn []token) {
+	/*TODO:
+	- undestand math
+
+	- par as seperate operation
+
+	- resolve all multiplications
+	- resolve all divisions
+	-
+	*/
+	var newList []token
+	for i := 0; i < len(tokenIn) && tokenIn[i].typeOfToken != EOL; i++ {
+		newList = append(newList, tokenIn[i])
+	}
+
+	var tempList [3]token
+
+	for x := 0; x < 5; x++ {
+
+		for i := 0; i < len(newList)-2; i++ {
+			tempList[0+0] = newList[i+0]
+			tempList[0+1] = newList[i+1]
+			tempList[0+2] = newList[i+2]
+			if tempList[0].typeOfToken == word_number && tempList[2].typeOfToken == word_number {
+				val1, _ := strconv.ParseFloat(string(tempList[0].content), 64)
+				val2, _ := strconv.ParseFloat(string(tempList[2].content), 64)
+				var res float64
+				if tempList[1].typeOfToken == op_mul {
+					res = val1 * val2
+				} else if tempList[1].typeOfToken == op_div {
+					res = val1 / val2
+				}
+				if tempList[1].typeOfToken == op_mul || tempList[1].typeOfToken == op_div {
+					newList[i].content = strconv.FormatFloat(res, 'f', 2, 64)
+					newList[i].typeOfToken = word_number
+					newList = append(newList[:i+1], newList[i+1+1:]...)
+					newList = append(newList[:i+1], newList[i+1+1:]...)
+					break
+				}
+			}
+		}
+	}
+
+	for x := 0; x < 5; x++ {
+
+		for i := 0; i < len(newList)-2; i++ {
+			tempList[0+0] = newList[i+0]
+			tempList[0+1] = newList[i+1]
+			tempList[0+2] = newList[i+2]
+			if tempList[0].typeOfToken == word_number && tempList[2].typeOfToken == word_number {
+				val1, _ := strconv.ParseFloat(string(tempList[0].content), 64)
+				val2, _ := strconv.ParseFloat(string(tempList[2].content), 64)
+				var res float64
+				if tempList[1].typeOfToken == op_add {
+					res = val1 + val2
+				} else if tempList[1].typeOfToken == op_sub {
+					res = val1 - val2
+				}
+				if tempList[1].typeOfToken == op_add || tempList[1].typeOfToken == op_sub {
+					newList[i].content = strconv.FormatFloat(res, 'f', 2, 64)
+					newList[i].typeOfToken = word_number
+					newList = append(newList[:i+1], newList[i+1+1:]...)
+					newList = append(newList[:i+1], newList[i+1+1:]...)
+					break
+				}
+			}
+		}
+	}
+
+	tokenPrint(newList)
+}
+
+type tokenTree struct {
+	content     string
+	typeOfToken mod
+	children    []tokenTree
 }
 
 /*
