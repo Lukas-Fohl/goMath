@@ -213,7 +213,13 @@ func main() {
 	}
 	err, correctedTokens := correctTypes(tokens)
 	//tokenPrint(correctedTokens)
-	math(correctedTokens)
+
+	var newList []token
+	for i := 0; i < len(correctedTokens) && correctedTokens[i].typeOfToken != EOL; i++ {
+		newList = append(newList, correctedTokens[i])
+	} //slice
+
+	tokenPrint(math(newList))
 }
 
 func isOperation(tokenTypeInput mod) bool {
@@ -223,29 +229,36 @@ func isOperation(tokenTypeInput mod) bool {
 	return false
 }
 
-func math(tokenIn []token) {
+func math(tokenIn []token) []token {
 	/*TODO:
 	- undestand math
 
-	- par as seperate operation
 
-	- resolve all multiplications
-	- resolve all divisions
-	-
+	x resolve all multiplications
+	x resolve all divisions
+
+	x find len of search
+	- resolve par:
+		- recusriv--> call function again with slice of string
 	*/
-	var newList []token
-	for i := 0; i < len(tokenIn) && tokenIn[i].typeOfToken != EOL; i++ {
-		newList = append(newList, tokenIn[i])
-	}
+
+	/*
+		look for first open parenthese
+		--> create slice of string (with out opening parenthese)
+		--> call function with slice
+		--> look for first closing parenthese
+		--> solve anything until parenthese
+		--> return
+	*/
 
 	var tempList [3]token
 
-	for x := 0; x < 5; x++ {
-
-		for i := 0; i < len(newList)-2; i++ {
-			tempList[0+0] = newList[i+0]
-			tempList[0+1] = newList[i+1]
-			tempList[0+2] = newList[i+2]
+	for x := 0; ; x++ {
+		didSomeThing := false
+		for i := 0; i < len(tokenIn)-2; i++ {
+			tempList[0+0] = tokenIn[i+0]
+			tempList[0+1] = tokenIn[i+1]
+			tempList[0+2] = tokenIn[i+2]
 			if tempList[0].typeOfToken == word_number && tempList[2].typeOfToken == word_number {
 				val1, _ := strconv.ParseFloat(string(tempList[0].content), 64)
 				val2, _ := strconv.ParseFloat(string(tempList[2].content), 64)
@@ -256,22 +269,26 @@ func math(tokenIn []token) {
 					res = val1 / val2
 				}
 				if tempList[1].typeOfToken == op_mul || tempList[1].typeOfToken == op_div {
-					newList[i].content = strconv.FormatFloat(res, 'f', 2, 64)
-					newList[i].typeOfToken = word_number
-					newList = append(newList[:i+1], newList[i+1+1:]...)
-					newList = append(newList[:i+1], newList[i+1+1:]...)
+					tokenIn[i].content = strconv.FormatFloat(res, 'f', 4, 64)
+					tokenIn[i].typeOfToken = word_number
+					tokenIn = append(tokenIn[:i+1], tokenIn[i+1+1:]...)
+					tokenIn = append(tokenIn[:i+1], tokenIn[i+1+1:]...)
+					didSomeThing = true
 					break
 				}
 			}
 		}
+		if !didSomeThing {
+			break
+		}
 	}
 
-	for x := 0; x < 5; x++ {
-
-		for i := 0; i < len(newList)-2; i++ {
-			tempList[0+0] = newList[i+0]
-			tempList[0+1] = newList[i+1]
-			tempList[0+2] = newList[i+2]
+	for x := 0; ; x++ {
+		didSomeThing := false
+		for i := 0; i < len(tokenIn)-2; i++ {
+			tempList[0+0] = tokenIn[i+0]
+			tempList[0+1] = tokenIn[i+1]
+			tempList[0+2] = tokenIn[i+2]
 			if tempList[0].typeOfToken == word_number && tempList[2].typeOfToken == word_number {
 				val1, _ := strconv.ParseFloat(string(tempList[0].content), 64)
 				val2, _ := strconv.ParseFloat(string(tempList[2].content), 64)
@@ -282,17 +299,21 @@ func math(tokenIn []token) {
 					res = val1 - val2
 				}
 				if tempList[1].typeOfToken == op_add || tempList[1].typeOfToken == op_sub {
-					newList[i].content = strconv.FormatFloat(res, 'f', 2, 64)
-					newList[i].typeOfToken = word_number
-					newList = append(newList[:i+1], newList[i+1+1:]...)
-					newList = append(newList[:i+1], newList[i+1+1:]...)
+					tokenIn[i].content = strconv.FormatFloat(res, 'f', 4, 64)
+					tokenIn[i].typeOfToken = word_number
+					tokenIn = append(tokenIn[:i+1], tokenIn[i+1+1:]...)
+					tokenIn = append(tokenIn[:i+1], tokenIn[i+1+1:]...)
+					didSomeThing = true
 					break
 				}
 			}
 		}
+		if !didSomeThing {
+			break
+		}
 	}
 
-	tokenPrint(newList)
+	return tokenIn
 }
 
 type tokenTree struct {
@@ -312,4 +333,12 @@ lexer:
 - check if tokens make sens
 - translate to logic
 - make programm --> asm??
+*/
+/*
+ops to add:
+- abs ...
+- power ... ...
+- root ... ...
+- factor ...
+- mod ... ...
 */
