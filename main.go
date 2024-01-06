@@ -190,6 +190,7 @@ func tokenPrint(tokens []token) {
 		out := "token: " + wor + "\t ; with type: " + tok
 		fmt.Println(out)
 	}
+	fmt.Println()
 }
 
 func main() {
@@ -219,7 +220,9 @@ func main() {
 		newList = append(newList, correctedTokens[i])
 	} //slice
 
-	tokenPrint(math(newList))
+	tokenPrint(newList)
+
+	tokenPrint(parentheseLine(newList))
 }
 
 func isOperation(tokenTypeInput mod) bool {
@@ -229,7 +232,28 @@ func isOperation(tokenTypeInput mod) bool {
 	return false
 }
 
-func math(tokenIn []token) []token {
+func parentheseLine(tokenIn []token) []token {
+
+	var tokenSample []token
+
+	for i := 0; i < len(tokenIn); i++ {
+		if tokenIn[i].typeOfToken == mod_par_nor_op {
+			if i+1 <= len(tokenIn)-1 {
+				tokenPrint(tokenIn[i+1 : len(tokenIn)-1])
+				parentheseLine(tokenIn[i+1 : len(tokenIn)-1])
+				//put return into array
+			}
+		} else if tokenIn[i].typeOfToken == mod_par_nor_cl {
+			tokenSample = mathLine(tokenSample)
+		} else {
+			tokenSample = append(tokenSample, tokenIn[i])
+		}
+	}
+
+	return tokenSample
+}
+
+func mathLine(tokenIn []token) []token {
 	/*TODO:
 	- undestand math
 
@@ -312,6 +336,8 @@ func math(tokenIn []token) []token {
 			break
 		}
 	}
+
+	//tokenPrint(tokenIn)
 
 	return tokenIn
 }
