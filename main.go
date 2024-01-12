@@ -222,7 +222,8 @@ func main() {
 
 	tokenPrint(newList)
 
-	tokenPrint(parentheseLine(newList))
+	tokens_, _ := parentheseLine(newList)
+	tokenPrint(tokens_)
 }
 
 func isOperation(tokenTypeInput mod) bool {
@@ -232,25 +233,42 @@ func isOperation(tokenTypeInput mod) bool {
 	return false
 }
 
-func parentheseLine(tokenIn []token) []token {
+func parentheseLine(tokenIn []token) ([]token, int) {
 
 	var tokenSample []token
+
+	var endIndex int = 0
 
 	for i := 0; i < len(tokenIn); i++ {
 		if tokenIn[i].typeOfToken == mod_par_nor_op {
 			if i+1 <= len(tokenIn)-1 {
-				tokenPrint(tokenIn[i+1 : len(tokenIn)-1])
-				parentheseLine(tokenIn[i+1 : len(tokenIn)-1])
-				//put return into array
+				//tokenPrint(tokenIn[i+1 : len(tokenIn)-1])
+				temp, indx := parentheseLine(tokenIn[i+1 : len(tokenIn)-1])
+				for p := 0; p < indx; p++ {
+					tokenSample = tokenIn
+					tokenSample = append(tokenIn[:(i)], tokenIn[(i+1):]...)
+					tokenPrint(tokenSample)
+				}
+				tokenSample = insertSliceAt(tokenIn, temp, i)
+				//put return into array + cut parentheses
 			}
 		} else if tokenIn[i].typeOfToken == mod_par_nor_cl {
+			endIndex = i
 			tokenSample = mathLine(tokenSample)
 		} else {
 			tokenSample = append(tokenSample, tokenIn[i])
 		}
 	}
 
-	return tokenSample
+	return tokenSample, endIndex
+}
+
+func insertSliceAt(list, insert []token, index int) []token {
+	result := make([]token, len(list)+len(insert))
+	copy(result, list[:index])
+	copy(result[index:], insert)
+	copy(result[index+len(insert):], list[index:])
+	return result
 }
 
 func mathLine(tokenIn []token) []token {
