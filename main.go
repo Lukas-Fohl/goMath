@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 	"unicode"
@@ -12,10 +13,13 @@ import (
 type mod int
 
 const (
-	op_add mod = iota
-	op_sub mod = iota
-	op_div mod = iota
-	op_mul mod = iota
+	op_add  mod = iota
+	op_sub  mod = iota
+	op_div  mod = iota
+	op_mul  mod = iota
+	op_pow  mod = iota
+	op_mod  mod = iota
+	op_root mod = iota
 
 	mod_par_cur_op mod = iota
 	mod_par_cur_cl mod = iota
@@ -123,6 +127,12 @@ func enumToString(value mod) string {
 		return "EOL"
 	case EOF:
 		return "EOF"
+	case op_mod:
+		return "%"
+	case op_root:
+		return "root"
+	case op_pow:
+		return "pow"
 	default:
 		return fmt.Sprintf("Unknown mod value: %d", value)
 	}
@@ -170,6 +180,15 @@ func correctTypes(tokens []token) (error, []token) {
 			break
 		case "print":
 			temp[i].typeOfToken = word_op_print
+			break
+		case "mod":
+			temp[i].typeOfToken = op_mod
+			break
+		case "root":
+			temp[i].typeOfToken = op_root
+			break
+		case "pow":
+			temp[i].typeOfToken = op_pow
 			break
 		default:
 
@@ -220,10 +239,12 @@ func main() {
 		newList = append(newList, correctedTokens[i])
 	} //slice
 
-	tokenPrint(newList)
+	//tokenPrint(mathLine(newList))
 
+	tokenPrint(mathLine(newList))
 	tokens_, _ := parentheseLine(newList)
 	tokenPrint(tokens_)
+	//parentheseLine(newList)
 }
 
 func isOperation(tokenTypeInput mod) bool {
@@ -242,15 +263,12 @@ func parentheseLine(tokenIn []token) ([]token, int) {
 	for i := 0; i < len(tokenIn); i++ {
 		if tokenIn[i].typeOfToken == mod_par_nor_op {
 			if i+1 <= len(tokenIn)-1 {
-				//tokenPrint(tokenIn[i+1 : len(tokenIn)-1])
-				temp, indx := parentheseLine(tokenIn[i+1 : len(tokenIn)-1])
-				for p := 0; p < indx; p++ {
-					tokenSample = tokenIn
+				temp, indx := parentheseLine(tokenIn[i+1:])
+				for p := 0; p < indx+1; p++ {
 					tokenSample = append(tokenIn[:(i)], tokenIn[(i+1):]...)
-					tokenPrint(tokenSample)
 				}
-				tokenSample = insertSliceAt(tokenIn, temp, i)
-				//put return into array + cut parentheses
+				tokenSample = insertSliceAt(tokenSample, temp, i)
+				//ERROR in line 244 .. 253 but idk where --> we return of by 1
 			}
 		} else if tokenIn[i].typeOfToken == mod_par_nor_cl {
 			endIndex = i
@@ -260,7 +278,8 @@ func parentheseLine(tokenIn []token) ([]token, int) {
 		}
 	}
 
-	return tokenSample, endIndex
+	//tokenPrint(tokenSample)
+	return tokenSample, (endIndex)
 }
 
 func insertSliceAt(list, insert []token, index int) []token {
@@ -272,6 +291,9 @@ func insertSliceAt(list, insert []token, index int) []token {
 }
 
 func mathLine(tokenIn []token) []token {
+	if len(tokenIn) <= 1 {
+		return tokenIn
+	}
 	/*TODO:
 	- undestand math
 
@@ -294,6 +316,39 @@ func mathLine(tokenIn []token) []token {
 	*/
 
 	var tempList [3]token
+
+	for x := 0; ; x++ {
+		didSomeThing := false
+		for i := 0; i < len(tokenIn)-2; i++ {
+			tempList[0+0] = tokenIn[i+0]
+			tempList[0+1] = tokenIn[i+1]
+			tempList[0+2] = tokenIn[i+2]
+			if tempList[0].typeOfToken == word_number && tempList[2].typeOfToken == word_number {
+				val1, _ := strconv.ParseFloat(string(tempList[0].content), 64)
+				val2, _ := strconv.ParseFloat(string(tempList[2].content), 64)
+				var res float64
+				if tempList[1].typeOfToken == op_pow {
+					res = math.Pow(val1, val2)
+				} else if tempList[1].typeOfToken == op_mod {
+					res = math.Mod(val1, val2)
+				} else if tempList[1].typeOfToken == op_root {
+					res = math.Pow(val2, 1/val1)
+					fmt.Println("hi")
+				}
+				if tempList[1].typeOfToken == op_pow || tempList[1].typeOfToken == op_root || tempList[1].typeOfToken == op_mod {
+					tokenIn[i].content = strconv.FormatFloat(res, 'f', 4, 64)
+					tokenIn[i].typeOfToken = word_number
+					tokenIn = append(tokenIn[:i+1], tokenIn[i+1+1:]...)
+					tokenIn = append(tokenIn[:i+1], tokenIn[i+1+1:]...)
+					didSomeThing = true
+					break
+				}
+			}
+		}
+		if !didSomeThing {
+			break
+		}
+	}
 
 	for x := 0; ; x++ {
 		didSomeThing := false
