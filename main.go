@@ -63,6 +63,11 @@ func splitIntoTokens(fileInput string) (error, []token) {
 					tokenType = word_number
 				} else {
 					tokenType = word_word
+					if lineIter+1 < len(strings.Split(fileInput, "\n")[i])-1 {
+						if currentChar == "-" && unicode.IsDigit(rune(strings.Split(fileInput, "\n")[i][lineIter+1])) {
+							tokenType = word_number
+						}
+					}
 				}
 				lineIter++
 				if lineIter < len(strings.Split(fileInput, "\n")[i]) {
