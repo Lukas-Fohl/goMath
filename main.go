@@ -64,7 +64,7 @@ func splitIntoTokens(fileInput string) (error, []token) {
 				} else {
 					tokenType = word_word
 					if lineIter+1 < len(strings.Split(fileInput, "\n")[i])-1 {
-						if currentChar == "-" && unicode.IsDigit(rune(strings.Split(fileInput, "\n")[i][lineIter+1])) {
+						if currentChar == '-' && unicode.IsDigit(rune(strings.Split(fileInput, "\n")[i][lineIter+1])) {
 							tokenType = word_number
 						}
 					}
@@ -222,34 +222,42 @@ func main() {
 	if err != nil {
 		log.Fatalf("unable to read file: %v", err)
 	}
+	//get File
 
 	err, out := cleanFile(string(body))
+	//clear file of things
 
 	if err != nil {
 		log.Fatalf("cant clean file: %v", err)
 	}
+	//error if can't clean File
 
 	body = []byte(out)
+	//create body
 
 	err, tokens := splitIntoTokens(string(body))
+	//convert
 
 	if err != nil {
 		log.Fatalf("cant split into tokens: %v", err)
 	}
+	//throw error if can't convert
 	err, correctedTokens := correctTypes(tokens)
-	//tokenPrint(correctedTokens)
+
+	if err != nil {
+		log.Fatalf("cant convert types: %v", err)
+	}
 
 	var newList []token
 	for i := 0; i < len(correctedTokens) && correctedTokens[i].typeOfToken != EOL; i++ {
 		newList = append(newList, correctedTokens[i])
-	} //slice
+	} //get first line
 
-	//tokenPrint(mathLine(newList))
-
-	tokenPrint(mathLine(newList))
 	tokens_, _ := parentheseLine(newList)
 	tokenPrint(tokens_)
-	//parentheseLine(newList)
+	tokens__, _, _ := newParentheseLine(newList)
+	tokenPrint(tokens__)
+	//solve parentheses
 }
 
 func isOperation(tokenTypeInput mod) bool {
@@ -267,13 +275,12 @@ func parentheseLine(tokenIn []token) ([]token, int) {
 
 	for i := 0; i < len(tokenIn); i++ {
 		if tokenIn[i].typeOfToken == mod_par_nor_op {
-			if i+1 <= len(tokenIn)-1 {
+			if i+1 < len(tokenIn) {
 				temp, indx := parentheseLine(tokenIn[i+1:])
 				for p := 0; p < indx+1; p++ {
 					tokenSample = append(tokenIn[:(i)], tokenIn[(i+1):]...)
 				}
 				tokenSample = insertSliceAt(tokenSample, temp, i)
-				//ERROR in line 244 .. 253 but idk where --> we return of by 1
 			}
 		} else if tokenIn[i].typeOfToken == mod_par_nor_cl {
 			endIndex = i
@@ -283,8 +290,55 @@ func parentheseLine(tokenIn []token) ([]token, int) {
 		}
 	}
 
-	//tokenPrint(tokenSample)
 	return tokenSample, (endIndex)
+}
+
+func newParentheseLine(tokenIn []token /*, startIndex int, endIndex int*/) ([]token, int, int) {
+
+	var tokenSample []token
+
+	var currentStartIndex int = 0
+	var currentEndIndex int = 0
+
+	//run through list --> find first open parenthese --> find next closed one restart if new open found --> solve content --> do again
+
+	for containsParenthese(tokenIn) {
+		for i := 0; i < len(tokenIn); i++ {
+			if tokenIn[i].typeOfToken == mod_par_nor_op {
+				tokenSample = []token{}
+				currentStartIndex = i
+			} else if tokenIn[i].typeOfToken == mod_par_nor_cl {
+				mathLine(tokenSample) //--> replace in tokenIn
+			} else {
+				tokenSample = append(tokenSample, tokenIn[i])
+				currentEndIndex = i
+			}
+		}
+	}
+
+	/*what:
+
+	- first char until closed parenthese = enclosed problem
+
+	- get line x
+	- find open parenthese x
+		--> capture anything until new open (call self) or closed parenthese
+		- when closed paenthese --> solve anythin inside
+	- return solved
+	- replaced solved:
+		- return solved list, + where in original list (start and end index)
+	*/
+
+	return tokenSample, currentStartIndex, currentEndIndex
+}
+
+func containsParenthese(tokenIn []token) bool {
+	for i := 0; i < len(tokenIn); i++ {
+		if tokenIn[i].typeOfToken == mod_par_nor_cl || tokenIn[i].typeOfToken == mod_par_nor_op {
+			return true
+		}
+	}
+	return false
 }
 
 func insertSliceAt(list, insert []token, index int) []token {
@@ -415,12 +469,10 @@ func mathLine(tokenIn []token) []token {
 		}
 	}
 
-	//tokenPrint(tokenIn)
-
 	return tokenIn
 }
 
-type tokenTree struct {
+type tokenTree struct { //idk
 	content     string
 	typeOfToken mod
 	children    []tokenTree
