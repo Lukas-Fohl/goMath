@@ -253,8 +253,8 @@ func main() {
 		newList = append(newList, correctedTokens[i])
 	} //get first line
 
-	tokens_, _ := parentheseLine(newList)
-	tokenPrint(tokens_)
+	//tokens_, _ := parentheseLine(newList)
+	//tokenPrint(tokens_)
 	tokens__, _, _ := newParentheseLine(newList)
 	tokenPrint(tokens__)
 	//solve parentheses
@@ -308,7 +308,19 @@ func newParentheseLine(tokenIn []token /*, startIndex int, endIndex int*/) ([]to
 				tokenSample = []token{}
 				currentStartIndex = i
 			} else if tokenIn[i].typeOfToken == mod_par_nor_cl {
-				mathLine(tokenSample) //--> replace in tokenIn
+				tokenPrint(tokenIn)
+				currentEndIndex = i
+				temp := mathLine(tokenSample) //--> replace result in token
+				tokenSample = []token{}
+				for delIter := 0; delIter < (currentEndIndex-currentStartIndex)+2; delIter++ { //???
+					tokenIn = append(tokenIn[:currentStartIndex], tokenIn[currentStartIndex+1:]...)
+				}
+				tokenIn = insertSliceAt(tokenIn, temp, currentStartIndex)
+				currentEndIndex = 0
+				currentStartIndex = 0
+				tokenPrint(tokenIn)
+				panic("help")
+				break
 			} else {
 				tokenSample = append(tokenSample, tokenIn[i])
 				currentEndIndex = i
