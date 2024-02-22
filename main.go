@@ -253,10 +253,8 @@ func main() {
 		newList = append(newList, correctedTokens[i])
 	} //get first line
 
-	//tokens_, _ := parentheseLine(newList)
-	//tokenPrint(tokens_)
-	tokens__, _, _ := newParentheseLine(newList)
-	tokenPrint(tokens__)
+	tokens_, _, _ := parentheseLine(newList)
+	tokenPrint(tokens_)
 	//solve parentheses
 }
 
@@ -267,7 +265,7 @@ func isOperation(tokenTypeInput mod) bool {
 	return false
 }
 
-func parentheseLine(tokenIn []token) ([]token, int) {
+func testParentheseLine(tokenIn []token) ([]token, int) {
 
 	var tokenSample []token
 
@@ -276,7 +274,7 @@ func parentheseLine(tokenIn []token) ([]token, int) {
 	for i := 0; i < len(tokenIn); i++ {
 		if tokenIn[i].typeOfToken == mod_par_nor_op {
 			if i+1 < len(tokenIn) {
-				temp, indx := parentheseLine(tokenIn[i+1:])
+				temp, indx := testParentheseLine(tokenIn[i+1:])
 				for p := 0; p < indx+1; p++ {
 					tokenSample = append(tokenIn[:(i)], tokenIn[(i+1):]...)
 				}
@@ -293,7 +291,7 @@ func parentheseLine(tokenIn []token) ([]token, int) {
 	return tokenSample, (endIndex)
 }
 
-func newParentheseLine(tokenIn []token /*, startIndex int, endIndex int*/) ([]token, int, int) {
+func parentheseLine(tokenIn []token /*, startIndex int, endIndex int*/) ([]token, int, int) {
 
 	var tokenSample []token
 
@@ -308,18 +306,16 @@ func newParentheseLine(tokenIn []token /*, startIndex int, endIndex int*/) ([]to
 				tokenSample = []token{}
 				currentStartIndex = i
 			} else if tokenIn[i].typeOfToken == mod_par_nor_cl {
-				tokenPrint(tokenIn)
 				currentEndIndex = i
 				temp := mathLine(tokenSample) //--> replace result in token
 				tokenSample = []token{}
-				for delIter := 0; delIter < (currentEndIndex-currentStartIndex)+2; delIter++ { //???
+				for delIter := 0; delIter < (currentEndIndex-currentStartIndex)+1; delIter++ { //???
 					tokenIn = append(tokenIn[:currentStartIndex], tokenIn[currentStartIndex+1:]...)
 				}
 				tokenIn = insertSliceAt(tokenIn, temp, currentStartIndex)
 				currentEndIndex = 0
 				currentStartIndex = 0
-				tokenPrint(tokenIn)
-				panic("help")
+				//tokenPrint(tokenIn)
 				break
 			} else {
 				tokenSample = append(tokenSample, tokenIn[i])
@@ -341,7 +337,7 @@ func newParentheseLine(tokenIn []token /*, startIndex int, endIndex int*/) ([]to
 		- return solved list, + where in original list (start and end index)
 	*/
 
-	return tokenSample, currentStartIndex, currentEndIndex
+	return mathLine(tokenIn), currentStartIndex, currentEndIndex
 }
 
 func containsParenthese(tokenIn []token) bool {
