@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"fmt"
 )
 
 func cleanFile(fileInput string) (error, string) {
@@ -45,6 +46,18 @@ func main() {
 		log.Fatalf("cant convert types: %v", err)
 	}
 
+	values := map[string]float64{
+		"pi":	3.14159265358973236,
+		"e":	2.71828182845904523,
+		"r2":	1.41421356237309504,
+		"gr":	1.61803398874989484,
+	}
+	//--> var name in file as index + value as value
+	//index file first
+
+	fmt.Printf("%v\n",values["e"])
+
+	//TEST for math
 	var newList []token
 	for i := 0; i < len(correctedTokens) && correctedTokens[i].typeOfToken != EOL; i++ {
 		newList = append(newList, correctedTokens[i])

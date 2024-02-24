@@ -31,6 +31,7 @@ const (
 
 	word_op_return = iota
 	word_op_print  = iota
+	word_op_comment = iota
 	//word_op_if     = iota
 	//word_op_else   = iota
 
@@ -86,8 +87,12 @@ func enumToString(value mod) string {
 		return "root"
 	case op_pow:
 		return "pow"
+	case word_op_comment:
+		return "comment"
 	default:
-		return fmt.Sprintf("Unknown mod value: %d", value)
+		//TODO ERROR
+		fmt.Sprintf("Unknown mod value: %d", value)
+		return ""
 	}
 }
 
@@ -143,8 +148,10 @@ func correctTypes(tokens []token) (error, []token) {
 		case "pow":
 			temp[i].typeOfToken = op_pow
 			break
+		case "//":
+			temp[i].typeOfToken = word_op_comment
 		default:
-
+			//TODO error
 			break
 		}
 	}

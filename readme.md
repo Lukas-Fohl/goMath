@@ -19,3 +19,6 @@
 - [ ] function
 - [ ] return
 - [ ] variables
+
+### TODO
+- [ ] add errors for functions (token.go, math.go)
