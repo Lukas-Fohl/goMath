@@ -30,3 +30,8 @@ progA () {
 progB () {
     return 2 / 4 + 4
 }
+
+progC ( x ) {
+    a = x * x
+    return x
+}

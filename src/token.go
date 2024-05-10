@@ -29,8 +29,8 @@ const (
 	word_void_arg_empty     = iota
 	//word_check_mod          = iota
 
-	word_op_return = iota
-	word_op_print  = iota
+	word_op_return  = iota
+	word_op_print   = iota
 	word_op_comment = iota
 	//word_op_if     = iota
 	//word_op_else   = iota
